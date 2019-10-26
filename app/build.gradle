@@ -17,6 +17,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    sourceSets { main { assets.srcDirs = ['src/main/assets', 'src/main/assets/'] } }
 }
 
 dependencies {
@@ -29,6 +30,7 @@ dependencies {
 
     implementation 'com.github.promeg:tinypinyin:2.0.3' // TinyPinyin核心包，约80KB
 
-    implementation 'com.github.promeg:tinypinyin-lexicons-android-cncity:2.0.3' // 可选，适用于Android的中国地区词典
+    implementation 'com.github.promeg:tinypinyin-lexicons-android-cncity:2.0.3'
+    // 可选，适用于Android的中国地区词典
 
 }

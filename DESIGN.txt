@@ -1,0 +1,1 @@
+1. 因为Weather类数据上依赖于UserUrl类，所以Weather 类包含UserUrl 对象

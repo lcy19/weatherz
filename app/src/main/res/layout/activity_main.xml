@@ -43,7 +43,7 @@
         android:layout_weight="1">
 
         <TextView
-            android:id="@+id/temp"
+            android:id="@+id/tmp"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="match_parent"
@@ -80,11 +80,15 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
-        <TextView
-            android:id="@+id/future"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="future"
-            android:textSize="20sp"/>
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <TextView
+                android:id="@+id/future"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="future"
+                android:textSize="20sp"/>
+        </ScrollView>
     </LinearLayout>
 </LinearLayout>
