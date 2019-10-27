@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.renderscript.ScriptGroup;
@@ -35,8 +36,7 @@ import java.net.URL;
 import java.nio.Buffer;
 
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener{
-    private Button bt;
+public class MainActivity extends AppCompatActivity{
     private TextView address_time;
     private TextView tmp;
     private TextView weather;
@@ -51,12 +51,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
         initView();
         initDate();
-        bt.setOnClickListener(this);
 
     }
 
     public void initView(){
-        bt = (Button) findViewById(R.id.update);
         address_time = (TextView) findViewById(R.id.address_time);
         tmp = (TextView)findViewById(R.id.tmp);
         weather = (TextView)findViewById(R.id.weather);
@@ -65,24 +63,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public void initDate(){
         userUrl = new UserUrl();
-        String location = address_time.getText().toString().split(" ")[0];
-        Pinyin.init(Pinyin.newConfig().with(CnCityDict.getInstance(MainActivity.this)));
-        location = Pinyin.toPinyin(location, "").toLowerCase();
+        SharedPreferences pref = getSharedPreferences("data",MODE_PRIVATE);
+        String location =  pref.getString("location","");
+        if(location.length() < 2){
+            location = "beijing";
+        }
+
         String weather_type = "now";
         userUrl.setWeather_type(weather_type);
         userUrl.setLocation(location);
 
         updateWeather();
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch(v.getId()){
-            case R.id.update:
-                updateWeather();
-                break;
-                default:
-        }
     }
 
     @Override
@@ -95,11 +86,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch(item.getItemId()){
             case R.id.update_view:
-                //
-                Toast.makeText(this, "update view", Toast.LENGTH_LONG).show();
+                updateWeather();
                 break;
             case R.id.change_city:
-                //
                 Intent intent = new Intent(MainActivity.this,CityPickerActivity.class);
                 startActivityForResult(intent, RequestCodeInfo.GETCITY);
                 break;
@@ -115,7 +104,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             switch (requestCode) {
                 case RequestCodeInfo.GETCITY:
                     String city = data.getExtras().getString("city");
+                    Pinyin.init(Pinyin.newConfig().with(CnCityDict.getInstance(MainActivity.this)));
                     city = Pinyin.toPinyin(city, "").toLowerCase();
+                    SharedPreferences.Editor editor = getSharedPreferences("data",MODE_PRIVATE).edit();
+                    editor.putString("location", city);
+                    editor.apply();
                     userUrl.setLocation(city);
                     updateWeather();
                     break;
