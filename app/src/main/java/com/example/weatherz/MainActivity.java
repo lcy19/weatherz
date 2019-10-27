@@ -1,7 +1,10 @@
 package com.example.weatherz;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.renderscript.ScriptGroup;
@@ -13,6 +16,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.weatherz.Utils.RequestCodeInfo;
 import com.github.promeg.pinyinhelper.Pinyin;
 import com.github.promeg.tinypinyin.lexicons.android.cncity.CnCityDict;
 
@@ -68,19 +72,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         userUrl.setWeather_type(weather_type);
         userUrl.setLocation(location);
 
-        String urlString = "https://free-api.heweather.net/s6/weather/" + userUrl.getWeather_type()
-                + "?location=" + userUrl.getLocation() + "&key=" + key;
-        sendRequest(urlString);
+        updateWeather();
     }
 
     @Override
     public void onClick(View v) {
-        if( v.getId() == R.id.update){
-//            https://free-api.heweather.net/s6/weather/now?location=shanxi&key=dfff904798c948a7b07d71ae94f658ab
-
-            String urlString = "https://free-api.heweather.net/s6/weather/" + userUrl.getWeather_type()
-                    + "?location=" + userUrl.getLocation() + "&key=" + key;
-            sendRequest(urlString);
+        switch(v.getId()){
+            case R.id.update:
+                updateWeather();
+                break;
+                default:
         }
     }
 
@@ -99,11 +100,36 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.change_city:
                 //
-                Toast.makeText(this, "chang city", Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(MainActivity.this,CityPickerActivity.class);
+                startActivityForResult(intent, RequestCodeInfo.GETCITY);
                 break;
             default:
         }
         return true;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == Activity.RESULT_OK) {
+            switch (requestCode) {
+                case RequestCodeInfo.GETCITY:
+                    String city = data.getExtras().getString("city");
+                    city = Pinyin.toPinyin(city, "").toLowerCase();
+                    userUrl.setLocation(city);
+                    updateWeather();
+                    break;
+                    default:
+            }
+        }
+    }
+
+    public void updateWeather(){
+        // https://free-api.heweather.net/s6/weather/now?location=shanxi&key=dfff904798c948a7b07d71ae94f658ab
+
+        String urlString = "https://free-api.heweather.net/s6/weather/" + userUrl.getWeather_type()
+                + "?location=" + userUrl.getLocation() + "&key=" + key;
+        sendRequest(urlString);
     }
 
     private void sendRequest(final String urlString){
@@ -150,10 +176,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             JSONObject basic = weather.getJSONObject("basic");
             JSONObject update = weather.getJSONObject("update");
             JSONObject now = weather.getJSONObject("now");
-            String address_time = basic.getString("location") + " " + update.getString("loc");
+            String address = basic.getString("location");
+            String time = update.getString("loc");
             String tmp = now.getString("tmp");
             String cond_txt = now.getString("cond_txt");
-            myView = new MyView(address_time, tmp, cond_txt);
+            myView = new MyView(address, time, tmp, cond_txt);
 
             showResponse();
 
